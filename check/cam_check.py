@@ -30,18 +30,11 @@ class CamTuneNode(Node):
                 
         self.get_logger().info("Camera Ready --------------")
 
+        self.create_timer(1, self.process_images)
+
     def img_callback(self, data):
         # 수신한 메시지를 OpenCV 이미지로 변환하여 저장
         self.cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
-    
-    def run(self):
-        # 이미지를 처리하는 루프
-        while rclpy.ok():
-            rclpy.spin_once(self, timeout_sec=0.1)  # 메시지를 수신할 때까지 대기
-
-            if self.cv_image is not None:
-                # 수신된 이미지가 있을 때만 처리
-                self.process_images()
 
     def process_images(self):
         # 이미지 출력
@@ -59,7 +52,7 @@ def main(args=None):
 
     # run 메서드 실행 (영상 처리 루프)
     try:
-        node.run()
+        rclpy.spin(node)
     except KeyboardInterrupt:
         pass
     finally:

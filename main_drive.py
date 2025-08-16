@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from std_msgs.msg import Float32MultiArray
-import test
+import light
 
 class MainNode(Node):
     def __init__(self):
@@ -53,7 +53,7 @@ class MainNode(Node):
         self.motor_publisher = self.create_publisher(Float32MultiArray, 'xycar_motor', 1)
         self.motor_msg = Float32MultiArray()
 
-        self.speed = 10
+        self.speed = 0
         self.angle = 0
         
         self.get_logger().info('----- Xycar self-driving node started -----')
@@ -62,10 +62,18 @@ class MainNode(Node):
         # lidar 루프 : self.ranges
         # ultra 루프 : self.ultra_msg
 
+        # 신호등 변수
+        self.check_light = True
+
         main_save_var = self.create_timer(0.1, self.main_loop)
 
     def main_loop(self):
-        test.test_main_once(self)
+        if self.check_light:
+            color=light.define_light(self)
+            if color=="green": self.check_light=False
+        self.speed=3
+        self.drive(self.angle,self.speed)
+        
 
     def drive(self, angle, speed):
         self.motor_msg.data = [float(angle), float(speed)]
@@ -79,27 +87,6 @@ class MainNode(Node):
         while self.ultra_msg is None and rclpy.ok():
             rclpy.spin_once(self)  # 노드의 상태를 업데이트
             self.get_clock().sleep_for(rclpy.duration.Duration(seconds=0.1))  # 짧은 대기
-
-def create_save_folder(p_date="20250717"):
-    try: base_dir = os.path.dirname(os.path.abspath(__file__))
-    except NameError: base_dir = os.getcwd()
-
-    # 현재 날짜 폴더명
-    base_folder_name = p_date
-
-    # 중복되지 않는 폴더명 찾기
-    folder_name = base_folder_name
-    counter = 0
-    while os.path.exists(os.path.join(base_dir, folder_name)):
-        counter += 1
-        folder_name = f"{base_folder_name}({counter})"
-
-    # 최종 경로
-    folder_path = os.path.join(base_dir, folder_name)
-
-    # 폴더 및 파일 생성
-    os.makedirs(os.path.join(folder_path, "image"))
-    return folder_path
 
 def main(args=None):
     rclpy.init(args=args)

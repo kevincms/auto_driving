@@ -156,7 +156,7 @@ def pick_steering_angle(
 # =========================
 # 라바콘 클러스터링 & 원 업데이트(중복 제거)
 # =========================
-def cluster_labacon(ranges_m, graph, ax, circle_radius_cm=25):
+def cluster_labacon(ranges_m, graph=None, ax=None, circle_radius_cm=25):
     """
     ranges_m: LiDAR range 배열 (m)
     graph: cluster center 점(Line2D) 핸들 (set_data로 갱신)
@@ -178,10 +178,11 @@ def cluster_labacon(ranges_m, graph, ax, circle_radius_cm=25):
     labels = dbscan.fit_predict(pts)
 
     # --- 이전에 그린 라바콘 원 제거 ---
-    if hasattr(ax, "_cone_patches"):
-        for p in ax._cone_patches:
-            p.remove()
-    ax._cone_patches = []
+    if ax:
+        if hasattr(ax, "_cone_patches"):
+            for p in ax._cone_patches:
+                p.remove()
+        ax._cone_patches = []
 
     labacon_list = np.empty((0, 2))
     cx_list, cy_list = [], []
@@ -197,11 +198,12 @@ def cluster_labacon(ranges_m, graph, ax, circle_radius_cm=25):
 
                 c = Circle((mx, my), circle_radius_cm, fill=False,
                            color='red', linestyle='--', linewidth=1.5)
-                ax.add_patch(c)
-                ax._cone_patches.append(c)
+                if ax:
+                    ax.add_patch(c)
+                    ax._cone_patches.append(c)
 
     # 중심점 산점도 갱신
-    graph.set_data(cx_list, cy_list)
+    if graph: graph.set_data(cx_list, cy_list)
     return labacon_list
 
 # =========================
@@ -304,7 +306,8 @@ class Labacon_node:
     def labacon_main(self, obj):
         start=time.time()
         ranges = obj.ranges
-        labacon_list = cluster_labacon(ranges, self.cluster_points, self.ax, circle_radius_cm=25)
+        if self.debug_bool: labacon_list = cluster_labacon(ranges, self.cluster_points, self.ax)
+        else: labacon_list = cluster_labacon(ranges)
 
         angle = pick_steering_angle(
             obstacles_xy_cm=labacon_list,

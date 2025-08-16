@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from std_msgs.msg import Float32MultiArray
-import test
+import labacon_drive
 
 class MainNode(Node):
     def __init__(self):
@@ -53,7 +53,7 @@ class MainNode(Node):
         self.motor_publisher = self.create_publisher(Float32MultiArray, 'xycar_motor', 1)
         self.motor_msg = Float32MultiArray()
 
-        self.speed = 10
+        self.speed = 7
         self.angle = 0
         
         self.get_logger().info('----- Xycar self-driving node started -----')
@@ -62,10 +62,12 @@ class MainNode(Node):
         # lidar 루프 : self.ranges
         # ultra 루프 : self.ultra_msg
 
+        self.labacon_node=labacon_drive.Labacon_node()
         main_save_var = self.create_timer(0.1, self.main_loop)
 
     def main_loop(self):
-        test.test_main_once(self)
+        self.angle=self.labacon_node.labacon_main(self)
+        self.drive(self.angle,self.speed)
 
     def drive(self, angle, speed):
         self.motor_msg.data = [float(angle), float(speed)]

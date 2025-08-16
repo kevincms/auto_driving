@@ -62,7 +62,7 @@ class MainNode(Node):
         # lidar 루프 : self.ranges
         # ultra 루프 : self.ultra_msg
 
-        self.labacon_node=labacon_drive.Labacon_node()
+        self.labacon_node=labacon.Labacon_node()
         main_save_var = self.create_timer(0.1, self.main_loop)
 
     def main_loop(self):

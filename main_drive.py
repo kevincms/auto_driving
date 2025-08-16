@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from std_msgs.msg import Float32MultiArray
-import labacon_drive
+import labacon
 
 class MainNode(Node):
     def __init__(self):

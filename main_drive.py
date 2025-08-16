@@ -80,27 +80,6 @@ class MainNode(Node):
             rclpy.spin_once(self)  # 노드의 상태를 업데이트
             self.get_clock().sleep_for(rclpy.duration.Duration(seconds=0.1))  # 짧은 대기
 
-def create_save_folder(p_date="20250717"):
-    try: base_dir = os.path.dirname(os.path.abspath(__file__))
-    except NameError: base_dir = os.getcwd()
-
-    # 현재 날짜 폴더명
-    base_folder_name = p_date
-
-    # 중복되지 않는 폴더명 찾기
-    folder_name = base_folder_name
-    counter = 0
-    while os.path.exists(os.path.join(base_dir, folder_name)):
-        counter += 1
-        folder_name = f"{base_folder_name}({counter})"
-
-    # 최종 경로
-    folder_path = os.path.join(base_dir, folder_name)
-
-    # 폴더 및 파일 생성
-    os.makedirs(os.path.join(folder_path, "image"))
-    return folder_path
-
 def main(args=None):
     rclpy.init(args=args)
     main_node = MainNode()

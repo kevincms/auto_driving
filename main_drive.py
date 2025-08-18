@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
-from xycar_msgs.msg import XycarMotor
+from std_msgs.msg import Float32MultiArray
 import test
 
 class MainNode(Node):
@@ -50,8 +50,8 @@ class MainNode(Node):
         self.get_logger().info("Ultrasonic Ready ----------")
 
         # motor 사전준비
-        self.motor_publisher = self.create_publisher(XycarMotor, 'xycar_motor', 1)
-        self.motor_msg = XycarMotor()
+        self.motor_publisher = self.create_publisher(Float32MultiArray, 'xycar_motor', 1)
+        self.motor_msg = Float32MultiArray()
 
         self.speed = 10
         self.angle = 0
@@ -68,8 +68,7 @@ class MainNode(Node):
         test.test_main_once(self)
 
     def drive(self, angle, speed):
-        self.motor_msg.angle = float(angle)
-        self.motor_msg.speed = float(speed)
+        self.motor_msg.data = [float(angle), float(speed)]
         self.motor_publisher.publish(self.motor_msg)
 
     def img_callback(self, data): self.cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
